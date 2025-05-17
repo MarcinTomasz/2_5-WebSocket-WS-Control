@@ -7,8 +7,8 @@
 #include <Arduino_JSON.h>
 
 // Replace with your network credentials
-const char* ssid = "v6odchazime";
-const char* password = "V7odchazime";
+const char* ssid = "##";
+const char* password = "##";
 
 // Create AsyncWebServer object on port 80
 AsyncWebServer server(80);
@@ -17,10 +17,10 @@ AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 
 // Set number of outputs
-#define NUM_OUTPUTS 2
+#define NUM_OUTPUTS 3
 
 // Assign each GPIO to an output
-int outputGPIOs[NUM_OUTPUTS] = {2, 4};
+int outputGPIOs[NUM_OUTPUTS] = {2, 3, 4};
 
 // Initialize LittleFS
 void initLittleFS() {
@@ -109,7 +109,7 @@ void setup(){
   // Route for root / web page
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     if (LittleFS.exists("/index.html")) {
-      request->send(LittleFS, "/index.html", "text/html",false);
+      request->send(LittleFS, "/index.html", "text/html", false);
     } else {
         Serial.println("File not found");
         request->send(404, "text/plain", "File Not Found");

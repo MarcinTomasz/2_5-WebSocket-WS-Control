@@ -1,10 +1,8 @@
 var gateway = `ws://${window.location.hostname}/ws`;
 var websocket;
-
 function onLoad(event) {
     initWebSocket();
 }
-
 function initWebSocket() {
     console.log('Trying to open a WebSocket connection...');
     websocket = new WebSocket(gateway);
@@ -15,17 +13,14 @@ function initWebSocket() {
         console.log('WebSocket error:', event);
     };
 }
-
 function onOpen(event) {
     console.log('Connection opened');
     websocket.send("states");
 }
-
 function onClose(event) {
     console.log('Connection closed');
     setTimeout(initWebSocket, 2000);
 }
-
 function onMessage(event) {
     var myObj = JSON.parse(event.data);
     console.log(myObj);
@@ -34,7 +29,7 @@ function onMessage(event) {
         var state = myObj.gpios[i].state;
         console.log(output);
         console.log(state);
-        if (state == "1"){
+        if (state == "0"){
             document.getElementById(output).checked = true;
             document.getElementById(output+"s").innerHTML = "ON";
         }
@@ -45,7 +40,6 @@ function onMessage(event) {
     }
     console.log(event.data);
 }
-
 // Send Requests to Control GPIOs
 function toggleCheckbox (element) {
     console.log(element.id);
@@ -57,10 +51,8 @@ function toggleCheckbox (element) {
         document.getElementById(element.id+"s").innerHTML = "OFF";
     }
 }
-
 // Function to get and update GPIO states on the webpage when it loads for the first time
 function getStates(){
     websocket.send("states");
 }
-
 window.addEventListener('load', onLoad);
