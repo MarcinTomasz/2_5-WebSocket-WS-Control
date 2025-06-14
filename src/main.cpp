@@ -6,23 +6,23 @@
 #include "LittleFS.h"
 #include <Arduino_JSON.h>
 
-// Replace with your network credentials
+//Replace with network credentials
 const char* ssid = "##";
 const char* password = "##";
 
-// Create AsyncWebServer object on port 80
+//Create AsyncWebServer object on port 80
 AsyncWebServer server(80);
 
-// Create a WebSocket object
+//Create a WebSocket object
 AsyncWebSocket ws("/ws");
 
-// Set number of outputs
+//Set number of outputs
 #define NUM_OUTPUTS 3
 
-// Assign each GPIO to an output
+//Assign each GPIO to an output
 int outputGPIOs[NUM_OUTPUTS] = {2, 3, 4};
 
-// Initialize LittleFS
+//Initialize LittleFS
 void initLittleFS() {
   if (!LittleFS.begin(true)) {
     Serial.println("An error has occurred while mounting LittleFS");
@@ -44,6 +44,7 @@ void initWiFi() {
   Serial.println(WiFi.localIP());
 }
 
+// Returns a JSON string containing the current state of all output GPIOs
 String getOutputStates(){
   JSONVar myArray;
   for (int i =0; i<NUM_OUTPUTS; i++){
@@ -54,10 +55,12 @@ String getOutputStates(){
   return jsonString;
 }
 
+// Notify all connected WebSocket clients with the current state of outputs
 void notifyClients(String state) {
     ws.textAll(state);
 }
 
+// Handle incoming WebSocket messages
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
   AwsFrameInfo *info = (AwsFrameInfo*)arg;
   if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
@@ -73,6 +76,7 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
   }
 }
 
+//  WebSocket event handler for client connections, disconnections, messages, and errors
 void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,AwsEventType type, void *arg, uint8_t *data, size_t len) {
   switch (type) {
     case WS_EVT_CONNECT:
@@ -90,11 +94,13 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,AwsEventType t
   }
 }
 
+// Initialize WebSocket and set the event handler
 void initWebSocket() {
   ws.onEvent(onEvent);
   server.addHandler(&ws);
 }
 
+// Handle WebSocket cleanup in the loop
 void setup(){
   // Serial port for debugging purposes
   Serial.begin(115200);
@@ -116,6 +122,7 @@ void setup(){
     }
   });
 
+  // Serve static files from LittleFS
   server.serveStatic("/", LittleFS, "/");
   // Start server
   server.begin();
@@ -124,6 +131,7 @@ void setup(){
   Serial.println(WiFi.localIP());
 }
 
+// Periodically cleans up disconnected WebSocket clients
 void loop() {
   ws.cleanupClients();
 }
